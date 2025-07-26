@@ -70,10 +70,11 @@ def url_post():
             url=url,
             # errors=errors,
         )
-    repo.save(url)
-    flash('Страница успешно добавлена', 'success')
+    # repo.save(url)
+    # flash('Страница успешно добавлена', 'success')
     # return redirect(url_for('url_show(id)'), code=302)
-    return "Success!"
+    return render_template(
+        'urls.html')
 
 
 if __name__ == '__main__':
