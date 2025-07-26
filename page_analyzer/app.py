@@ -44,20 +44,20 @@ def url_show(id):
         messages=messages
     )
 
-# @app.route('/urls')
-# def urls_get():
-#     messages = get_flashed_messages(with_categories=True)
-#     term = request.args.get('term', '')
-#     if term:
-#         users = repo.get_by_term(term)
-#     else:
-#         users = repo.get_content()
-#     return render_template(
-#         'users/index.html',
-#         users=users,
-#         search=term,
-#         messages=messages
-#     )
+@app.route('/urls')
+def urls_get():
+    # messages = get_flashed_messages(with_categories=True)
+    # term = request.args.get('term', '')
+    # if term:
+    #     users = repo.get_by_term(term)
+    # else:
+    #     users = repo.get_content()
+    return render_template(
+        'urls.html',
+        # users=users,
+        # search=term,
+        # messages=messages
+    )
 
 @app.post('/')
 def url_post():
