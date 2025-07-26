@@ -72,9 +72,8 @@ def url_post():
         )
     # repo.save(url)
     # flash('Страница успешно добавлена', 'success')
-    # return redirect(url_for('url_show(id)'), code=302)
-    return render_template(
-        'urls.html')
+    return redirect(url_for('urls_get'), code=302)
+
 
 
 if __name__ == '__main__':
