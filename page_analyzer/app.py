@@ -70,9 +70,9 @@ def url_post():
             url=url,
             # errors=errors,
         )
-    # repo.save(url)
+    repo.save(url)
     # flash('Страница успешно добавлена', 'success')
-    return redirect(url_for('urls_get'), code=302)
+    return redirect(url_for('url_show', id=url.id), code=302)
 
 
 
