@@ -33,7 +33,12 @@ class UrlRepository:
 
     def find(self, id):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
+            cur.execute("SELECT * FROM urls WHERE id=%s", (id,))
             return cur.fetchone()
+
+    def get_content(self):
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT * FROM urls")
+            return cur.fetchall()
 
 

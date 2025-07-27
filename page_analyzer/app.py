@@ -52,9 +52,10 @@ def urls_get():
     #     users = repo.get_by_term(term)
     # else:
     #     users = repo.get_content()
+    urls = repo.get_content()
     return render_template(
         'urls.html',
-        # users=users,
+         urls=urls
         # search=term,
         # messages=messages
     )
@@ -71,8 +72,9 @@ def url_post():
             # errors=errors,
         )
     repo.save(url)
+
     # flash('Страница успешно добавлена', 'success')
-    return redirect(url_for('url_show'), code=302)
+    return redirect(url_for('urls_get'), code=302)
 
 
 
