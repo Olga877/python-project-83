@@ -16,14 +16,19 @@ class UrlRepository:
     #     return cur.fetchone()[0]
 
     def save(self, url_data):
-        with self.conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO urls (name) VALUES (%s) RETURNING id",
-                (url_data,)
-            )
-            id = cur.fetchone()[0]
-        self.conn.commit()
-        return id
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO urls (name) VALUES (%s) RETURNING id",
+                    (url_data,)
+                )
+                id = cur.fetchone()[0]
+            self.conn.commit()
+            return id
+        except Exception as e:
+            self.conn.rollback()
+            print(f"Error saving data: {e}")
+            return None
 
 
     def find(self, id):
