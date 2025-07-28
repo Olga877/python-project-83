@@ -19,7 +19,7 @@ class UrlRepository:
         try:
             with self.conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO urls (name) VALUES (%s) RETURNING id",
+                    "INSERT INTO urls (name) VALUES (%s) RETURNING id;",
                     (url_data,)
                 )
                 id = cur.fetchone()[0]
@@ -33,12 +33,12 @@ class UrlRepository:
 
     def find(self, id):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM urls WHERE id=%s", (id,))
+            cur.execute("SELECT * FROM urls WHERE id=%s;", (id,))
             return cur.fetchone()
 
     def get_content(self):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM urls")
+            cur.execute("SELECT * FROM urls ORDER BY id DESC;")
             return cur.fetchall()
 
 
