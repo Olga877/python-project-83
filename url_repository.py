@@ -34,6 +34,7 @@ class UrlRepository:
     def find(self, id):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM urls WHERE id=%s;", (id,))
+            self.conn.commit()
             return cur.fetchone()
 
     def get_content(self):
