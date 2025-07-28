@@ -34,7 +34,7 @@ repo = UrlRepository(conn)
 def index():
     return render_template("index.html")
 
-@app.route('/urls/<id>')
+@app.route('/urls/<int:id>')
 def url_show(id):
     messages = get_flashed_messages(with_categories=True)
     url = repo.find(id)
@@ -71,11 +71,11 @@ def url_post():
             # url=url,
             # errors=errors,
         )
-    repo.save(url_data)
-    url = repo.find(id)
+    url_id = repo.save(url_data)
+    # url = repo.find(id)
 
     flash('Страница успешно добавлена', 'success')
-    return redirect(url_for('url_show', id=url.id), code=302)
+    return redirect(url_for('url_show', id=url_id), code=302)
 
 
 
