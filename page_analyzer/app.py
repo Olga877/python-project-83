@@ -62,16 +62,17 @@ def urls_get():
 
 @app.post('/')
 def url_post():
-    url = request.form['url']
-    is_valid = validators.url(url)
+    url_data = request.form['url']
+    is_valid = validators.url(url_data)
     if not is_valid:
         flash('Некорректный URL', 'error')
         return render_template(
             'index.html',
-            url=url,
+            # url=url,
             # errors=errors,
         )
-    repo.save(url)
+    repo.save(url_data)
+    url = repo.find(id)
 
     flash('Страница успешно добавлена', 'success')
     return redirect(url_for('url_show', id=url.id), code=302)
