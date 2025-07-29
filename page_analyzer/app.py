@@ -87,6 +87,9 @@ def url_post():
         flash('Страница уже существует', 'error')
         return redirect(url_for('url_show', id=url_id), code=302)
 
+@app.post('/urls/<int:id>/checks')
+def url_check():
+
 
 
 
