@@ -34,12 +34,31 @@ class UrlRepository:
     def find(self, id):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM urls WHERE id=%s;", (id,))
-            self.conn.commit()
             return cur.fetchone()
+
+    def find_by_name(self, name):
+        with self.conn.cursor() as cur:
+            cur.execute("SELECT id FROM urls WHERE name=%s;", (name,))
+            id = cur.fetchone()[0]
+            return id if id else None
+
 
     def get_content(self):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM urls ORDER BY id DESC;")
             return cur.fetchall()
+
+    def is_unique(self, url):
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "SELECT 1 FROM urls WHERE name = %s;",
+                (url,)
+            )
+            name = cur.fetchone()
+            if not name:
+                return True
+            return False
+
+
 
 

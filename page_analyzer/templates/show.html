@@ -17,6 +17,28 @@
 </nav>
 
   </header>
+    {% with errors = get_flashed_messages(category_filter=["error"]) %}
+    {% if errors %}
+    <div class="alert alert-primary" role="alert">
+
+        {%- for message in errors %}
+          <div>{{ message }}</div>
+        {% endfor -%}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% with success = get_flashed_messages(category_filter=["success"]) %}
+    {% if success %}
+    <div class="alert alert-success" role="alert">
+
+        {%- for message in success %}
+          <div>{{ message }}</div>
+        {% endfor -%}
+
+    </div>
+    {% endif %}
+    {% endwith %}
 
 
 

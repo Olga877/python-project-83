@@ -30,6 +30,9 @@ repo = UrlRepository(conn)
 #     parsed_url = urlparse(url)
 #     return all([parsed_url.scheme, parsed_url.netloc])
 
+
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -62,20 +65,29 @@ def urls_get():
 
 @app.post('/')
 def url_post():
-    url_data = request.form['url']
-    is_valid = validators.url(url_data)
+    # term = request.args.get('term', '')
+    unparsed_url = request.form['url']
+    parsed_url = urlparse(request.form['url'])
+    url_data = f"{parsed_url.scheme}://{parsed_url.netloc}"
+    is_valid = validators.url(unparsed_url)
     if not is_valid:
         flash('Некорректный URL', 'error')
         return render_template(
             'index.html',
-            # url=url,
+            url_address=unparsed_url,
             # errors=errors,
         )
-    url_id = repo.save(url_data)
-    # url = repo.find(id)
+    unique_url = repo.is_unique(url_data)
+    if unique_url:
+        url_id = repo.save(url_data)
+        flash('Страница успешно добавлена', 'success')
+        return redirect(url_for('url_show', id=url_id), code=302)
+    else:
+        url_id = repo.find_by_name(url_data)
+        flash('Страница уже существует', 'error')
+        return redirect(url_for('url_show', id=url_id), code=302)
 
-    flash('Страница успешно добавлена', 'success')
-    return redirect(url_for('url_show', id=url_id), code=302)
+
 
 
 
