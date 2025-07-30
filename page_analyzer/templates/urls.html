@@ -11,7 +11,7 @@
   <a class="navbar-brand" href="/">Анализатор страниц</a>
   <div id="navbarNav" bis_skin_checked="1">
       <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link " href="/urls">Сайты</a></li>
+        <li class="nav-item"><a class="nav-link " href="{{ url_for('urls_get') }}">Сайты</a></li>
       </ul>
   </div>
 </nav>
@@ -47,7 +47,7 @@
           <td>{{ url.check_date }}</td>
 
 
-          <td></td>
+          <td>{{ url.status }}</td>
 
 
         </tr>

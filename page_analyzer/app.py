@@ -24,15 +24,6 @@ conn = psycopg2.connect(DATABASE_URL)
 repo = UrlRepository(conn)
 
 
-
-
-# def validate(url):
-#     parsed_url = urlparse(url)
-#     return all([parsed_url.scheme, parsed_url.netloc])
-
-
-
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -41,7 +32,6 @@ def index():
 def url_show(id):
     messages = get_flashed_messages(with_categories=True)
     url = repo.find(id)
-    # check_id = repo.get_checked(id)
     checked_urls = repo.find_checks(id)
     return render_template(
         'show.html',
@@ -52,18 +42,10 @@ def url_show(id):
 
 @app.route('/urls')
 def urls_get():
-    # messages = get_flashed_messages(with_categories=True)
-    # term = request.args.get('term', '')
-    # if term:
-    #     users = repo.get_by_term(term)
-    # else:
-    #     users = repo.get_content()
     urls = repo.get_content()
     return render_template(
         'urls.html',
          urls=urls
-        # search=term,
-        # messages=messages
     )
 
 @app.post('/')
@@ -93,10 +75,13 @@ def url_post():
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def url_check(id):
     url = repo.find(id)
-    repo.get_checked(id)
-    # checked_url =repo.find_checks(check_id)
-    flash('Страница успешно проверена', 'success')
-    return redirect(url_for('url_show', id=url['id']), code=302)
+    result = repo.get_checked(id)
+    if result:
+        flash('Страница успешно проверена', 'success')
+        return redirect(url_for('url_show', id=url['id']), code=302)
+    else:
+        flash('Произошла ошибка при проверке', 'error')
+        return redirect(url_for('url_show', id=url['id']), code=302)
 
 
 
