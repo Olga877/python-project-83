@@ -90,8 +90,9 @@ class UrlRepository:
 
 
     def get_content(self):
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("""
+        try:
+            with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
                             SELECT DISTINCT ON (urls.id) 
                                 urls.*,
                                 COALESCE(url_checks.created_at::TEXT, '') AS check_date,
@@ -100,7 +101,11 @@ class UrlRepository:
                             LEFT JOIN url_checks ON urls.id = url_checks.url_id
                             ORDER BY urls.id DESC;
                         """)
-            return cur.fetchall()
+                return cur.fetchall()
+        except Exception as e:
+            return None
+
+
 
 
     def is_unique(self, url):
