@@ -1,4 +1,5 @@
 from psycopg2.extras import RealDictCursor
+from bs4 import BeautifulSoup
 import requests
 
 
@@ -42,14 +43,39 @@ class UrlRepository:
             print(f"Error occurred: {e}")
             return None
 
+    def check_url_h1_title_description(self, url):
+        seo = {}
+        response = requests.get(url)
+        html_content = response.text
+        soup = BeautifulSoup(html_content, 'html.parser')
+        h1 = soup.h1
+        if h1:
+            seo['h1'] = h1.text
+        else:
+            seo['h1'] = ""
+        title = soup.title
+        if title:
+            seo['title'] = title.text
+        else:
+            seo['title'] = ""
+        meta_description_tag = soup.find('meta', attrs={'name': 'description'})
+        if meta_description_tag:
+            description = meta_description_tag.get('content')
+        else:
+            description = ""
+        seo['description'] = description
+
+        return seo
+
     def get_checked(self, id):
         url = self.find(id)['name']
+        seo = self.check_url_h1_title_description(url)
         status = self.check_url_status(url)
         if status:
             with self.conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO url_checks (url_id, status_code) VALUES (%s, %s) RETURNING id;",
-                    (id, status)
+                    "INSERT INTO url_checks (url_id, status_code, h1, title, description) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
+                    (id, status, seo['h1'], seo['title'], seo['description'])
                 )
                 check_id = cur.fetchone()[0]
                 self.conn.commit()
