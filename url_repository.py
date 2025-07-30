@@ -42,11 +42,40 @@ class UrlRepository:
             id = cur.fetchone()[0]
             return id if id else None
 
+    def get_checked(self, id):
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO url_checks (url_id) VALUES (%s) RETURNING id;",
+                (id,)
+            )
+            check_id = cur.fetchone()[0]
+        self.conn.commit()
+        return check_id
+
+    def find_checks(self, id):
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;", (id,))
+            return cur.fetchall()
+
+    # def find_latest_check(self, id):
+    #     with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+    #         cur.execute("SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;", (id,))
+    #         return cur.fetchone()
+
+
 
     def get_content(self):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM urls ORDER BY id DESC;")
+            cur.execute("""
+                            SELECT DISTINCT ON (urls.id) 
+                                urls.*,
+                                COALESCE(url_checks.created_at::TEXT, '') AS check_date
+                            FROM urls
+                            LEFT JOIN url_checks ON urls.id = url_checks.url_id
+                            ORDER BY urls.id DESC;
+                        """)
             return cur.fetchall()
+
 
     def is_unique(self, url):
         with self.conn.cursor() as cur:

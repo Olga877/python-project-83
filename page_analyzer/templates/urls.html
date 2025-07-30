@@ -41,10 +41,10 @@
         <tr>
           <td>{{ url.id }}</td>
           <td>
-            {{ url.name }}
+            <a href="{{ url_for('url_show', id=url.id)}}"> {{ url.name }}</a>
           </td>
 
-          <td>{{ url.created_at }}</td>
+          <td>{{ url.check_date }}</td>
 
 
           <td></td>

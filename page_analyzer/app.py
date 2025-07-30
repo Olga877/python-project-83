@@ -41,9 +41,12 @@ def index():
 def url_show(id):
     messages = get_flashed_messages(with_categories=True)
     url = repo.find(id)
+    # check_id = repo.get_checked(id)
+    checked_urls = repo.find_checks(id)
     return render_template(
         'show.html',
         url=url,
+        checked_urls=checked_urls,
         messages=messages
     )
 
@@ -87,8 +90,14 @@ def url_post():
         flash('Страница уже существует', 'error')
         return redirect(url_for('url_show', id=url_id), code=302)
 
-@app.post('/urls/<int:id>/checks')
-def url_check():
+@app.route('/urls/<int:id>/checks', methods=['POST'])
+def url_check(id):
+    url = repo.find(id)
+    repo.get_checked(id)
+    # checked_url =repo.find_checks(check_id)
+    flash('Страница успешно проверена', 'success')
+    return redirect(url_for('url_show', id=url['id']), code=302)
+
 
 
 
