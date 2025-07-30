@@ -24,15 +24,21 @@ class UrlRepository:
 
 
     def find(self, id):
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM urls WHERE id=%s;", (id,))
-            return cur.fetchone()
+        try:
+            with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("SELECT * FROM urls WHERE id=%s;", (id,))
+                return cur.fetchone()
+        except Exception as e:
+            return None
 
     def find_by_name(self, name):
-        with self.conn.cursor() as cur:
-            cur.execute("SELECT id FROM urls WHERE name=%s;", (name,))
-            id = cur.fetchone()[0]
-            return id if id else None
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("SELECT id FROM urls WHERE name=%s;", (name,))
+                id = cur.fetchone()[0]
+                return id if id else None
+        except Exception as e:
+            return None
 
     def check_url_status(self, url):
         try:
@@ -68,25 +74,31 @@ class UrlRepository:
         return seo
 
     def get_checked(self, id):
-        url = self.find(id)['name']
-        seo = self.check_url_h1_title_description(url)
-        status = self.check_url_status(url)
-        if status:
-            with self.conn.cursor() as cur:
-                cur.execute(
-                    "INSERT INTO url_checks (url_id, status_code, h1, title, description) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
-                    (id, status, seo['h1'], seo['title'], seo['description'])
-                )
-                check_id = cur.fetchone()[0]
-                self.conn.commit()
-                return check_id
-        else:
+        try:
+            url = self.find(id)['name']
+            seo = self.check_url_h1_title_description(url)
+            status = self.check_url_status(url)
+            if status:
+                with self.conn.cursor() as cur:
+                    cur.execute(
+                        "INSERT INTO url_checks (url_id, status_code, h1, title, description) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
+                        (id, status, seo['h1'], seo['title'], seo['description'])
+                    )
+                    check_id = cur.fetchone()[0]
+                    self.conn.commit()
+                    return check_id
+            else:
+                return None
+        except Exception as e:
             return None
 
     def find_checks(self, id):
-        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;", (id,))
-            return cur.fetchall()
+        try:
+            with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;", (id,))
+                return cur.fetchall()
+        except Exception as e:
+            return None
 
 
     def get_content(self):
