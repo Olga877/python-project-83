@@ -17,8 +17,8 @@ class UrlRepository:
                     (url_data,)
                 )
                 id = cur.fetchone()[0]
-            self.conn.commit()
-            return id
+                self.conn.commit()
+                return id
         except Exception as e:
             self.conn.rollback()
             print(f"Error saving data: {e}")
