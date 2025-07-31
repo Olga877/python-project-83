@@ -1,17 +1,19 @@
 import os
+from urllib.parse import urlparse
+
+import psycopg2
+import validators
 from dotenv import load_dotenv
 from flask import (
-    get_flashed_messages,
-    flash,
     Flask,
+    flash,
+    get_flashed_messages,
     redirect,
     render_template,
     request,
-    url_for
+    url_for,
 )
-import psycopg2
-import validators
-from urllib.parse import urlparse
+
 from url_repository import UrlRepository
 
 load_dotenv()
@@ -28,6 +30,7 @@ repo = UrlRepository(conn)
 def index():
     return render_template("index.html")
 
+
 @app.route('/urls/<int:id>')
 def url_show(id):
     messages = get_flashed_messages(with_categories=True)
@@ -40,6 +43,7 @@ def url_show(id):
         messages=messages
     )
 
+
 @app.route('/urls')
 def urls_get():
     urls = repo.get_content()
@@ -47,6 +51,7 @@ def urls_get():
         'urls.html',
          urls=urls
     )
+
 
 @app.post('/')
 def url_post():
@@ -72,6 +77,7 @@ def url_post():
         flash('Страница уже существует', 'error')
         return redirect(url_for('url_show', id=url_id), code=302)
 
+
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def url_check(id):
     url = repo.find(id)
@@ -82,10 +88,6 @@ def url_check(id):
     else:
         flash('Произошла ошибка при проверке', 'error')
         return redirect(url_for('url_show', id=url['id']), code=302)
-
-
-
-
 
 
 if __name__ == '__main__':

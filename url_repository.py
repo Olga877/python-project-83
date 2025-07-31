@@ -1,6 +1,6 @@
-from psycopg2.extras import RealDictCursor
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
+from psycopg2.extras import RealDictCursor
 
 
 class UrlRepository:
@@ -11,7 +11,9 @@ class UrlRepository:
         try:
             with self.conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO urls (name) VALUES (%s) RETURNING id;",
+                    """
+                        INSERT INTO urls (name) VALUES (%s)
+                        RETURNING id;""",
                     (url_data,)
                 )
                 id = cur.fetchone()[0]
@@ -22,13 +24,12 @@ class UrlRepository:
             print(f"Error saving data: {e}")
             return None
 
-
     def find(self, id):
         try:
             with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("SELECT * FROM urls WHERE id=%s;", (id,))
                 return cur.fetchone()
-        except Exception as e:
+        except Exception:
             return None
 
     def find_by_name(self, name):
@@ -37,7 +38,7 @@ class UrlRepository:
                 cur.execute("SELECT id FROM urls WHERE name=%s;", (name,))
                 id = cur.fetchone()[0]
                 return id if id else None
-        except Exception as e:
+        except Exception:
             return None
 
     def check_url_status(self, url):
@@ -81,7 +82,9 @@ class UrlRepository:
             if status:
                 with self.conn.cursor() as cur:
                     cur.execute(
-                        "INSERT INTO url_checks (url_id, status_code, h1, title, description) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
+                        """
+                            INSERT INTO url_checks (url_id, status_code, h1, title, description)
+                            VALUES (%s, %s, %s, %s, %s) RETURNING id;""",
                         (id, status, seo['h1'], seo['title'], seo['description'])
                     )
                     check_id = cur.fetchone()[0]
@@ -89,7 +92,7 @@ class UrlRepository:
                     return check_id
             else:
                 return None
-        except Exception as e:
+        except Exception:
             return None
 
     def find_checks(self, id):
@@ -97,9 +100,8 @@ class UrlRepository:
             with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;", (id,))
                 return cur.fetchall()
-        except Exception as e:
+        except Exception:
             return None
-
 
     def get_content(self):
         try:
@@ -114,11 +116,8 @@ class UrlRepository:
                             ORDER BY urls.id DESC;
                         """)
                 return cur.fetchall()
-        except Exception as e:
+        except Exception:
             return None
-
-
-
 
     def is_unique(self, url):
         with self.conn.cursor() as cur:
