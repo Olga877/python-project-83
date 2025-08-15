@@ -18,11 +18,13 @@ class UrlRepository:
                 )
                 id = cur.fetchone()[0]
                 self.conn.commit()
+                self.conn.close()
                 return id
         except Exception as e:
             self.conn.rollback()
             print(f"Error saving data: {e}")
             return None
+
 
     def find(self, id):
         try:

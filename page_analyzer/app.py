@@ -22,8 +22,8 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-conn = psycopg2.connect(DATABASE_URL)
-repo = UrlRepository(conn)
+# conn = psycopg2.connect(DATABASE_URL)
+# repo = UrlRepository(conn)
 
 
 @app.route("/")
@@ -55,7 +55,8 @@ def urls_get():
 
 @app.post('/')
 def url_post():
-    # term = request.args.get('term', '')
+    conn = psycopg2.connect(DATABASE_URL)
+    repo = UrlRepository(conn)
     unparsed_url = request.form['url']
     parsed_url = urlparse(request.form['url'])
     url_data = f"{parsed_url.scheme}://{parsed_url.netloc}"
