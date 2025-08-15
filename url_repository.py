@@ -8,29 +8,28 @@ class UrlRepository:
         self.conn = conn
 
     def save(self, url_data):
-        try:
-            with self.conn.cursor() as cur:
-                cur.execute(
-                    """
-                        INSERT INTO urls (name) VALUES (%s)
-                        RETURNING id;""",
-                    (url_data,)
-                )
-                id = cur.fetchone()[0]
-                self.conn.commit()
-                self.conn.close()
-                return id
-        except Exception as e:
-            self.conn.rollback()
-            print(f"Error saving data: {e}")
-            return None
+        with self.conn:
+            try:
+                with self.conn.cursor() as cur:
+                    cur.execute(
+                        """
+                            INSERT INTO urls (name) VALUES (%s)
+                            RETURNING id;""",
+                        (url_data,)
+                    )
+                    id = cur.fetchone()[0]
+                    self.conn.commit()
+                    return id
+            except Exception as e:
+                self.conn.rollback()
+                print(f"Error saving data: {e}")
+                return None
 
 
     def find(self, id):
         try:
             with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("SELECT * FROM urls WHERE id=%s;", (id,))
-                self.conn.close()
                 return cur.fetchone()
         except Exception:
             return None
@@ -40,7 +39,7 @@ class UrlRepository:
             with self.conn.cursor() as cur:
                 cur.execute("SELECT id FROM urls WHERE name=%s;", (name,))
                 id = cur.fetchone()[0]
-                self.conn.close()
+
                 return id if id else None
         except Exception:
             return None
@@ -93,7 +92,7 @@ class UrlRepository:
                     )
                     check_id = cur.fetchone()[0]
                     self.conn.commit()
-                    self.conn.close()
+
                     return check_id
             else:
                 return None
@@ -104,7 +103,7 @@ class UrlRepository:
         try:
             with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;", (id,))
-                self.conn.close()
+
                 return cur.fetchall()
         except Exception:
             return None
@@ -121,7 +120,7 @@ class UrlRepository:
                             LEFT JOIN url_checks ON urls.id = url_checks.url_id
                             ORDER BY urls.id DESC;
                         """)
-                self.conn.close()
+
                 return cur.fetchall()
         except Exception:
             return None
@@ -133,7 +132,7 @@ class UrlRepository:
                 (url,)
             )
             name = cur.fetchone()
-            self.conn.close()
+
             if not name:
                 return True
             return False
