@@ -33,6 +33,8 @@ def index():
 
 @app.route('/urls/<int:id>')
 def url_show(id):
+    conn = psycopg2.connect(DATABASE_URL)
+    repo = UrlRepository(conn)
     messages = get_flashed_messages(with_categories=True)
     url = repo.find(id)
     checked_urls = repo.find_checks(id)
@@ -46,6 +48,8 @@ def url_show(id):
 
 @app.route('/urls')
 def urls_get():
+    conn = psycopg2.connect(DATABASE_URL)
+    repo = UrlRepository(conn)
     urls = repo.get_content()
     return render_template(
         'urls.html',
@@ -81,6 +85,8 @@ def url_post():
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def url_check(id):
+    conn = psycopg2.connect(DATABASE_URL)
+    repo = UrlRepository(conn)
     url = repo.find(id)
     result = repo.get_checked(id)
     if result:
