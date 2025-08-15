@@ -14,16 +14,12 @@ from flask import (
     url_for,
 )
 
-from url_repository import UrlRepository
+from page_analyzer.url_repository import UrlRepository
 
 load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
-
-
-# conn = psycopg2.connect(DATABASE_URL)
-# repo = UrlRepository(conn)
 
 
 @app.route("/")
