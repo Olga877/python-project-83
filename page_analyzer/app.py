@@ -66,8 +66,7 @@ def url_post():
         return render_template(
             'index.html',
             url_address=unparsed_url,
-            code=422,
-        )
+        ), 422
     unique_url = repo.is_unique(url_data)
     if unique_url:
         url_id = repo.save(url_data)
