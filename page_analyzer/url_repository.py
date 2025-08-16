@@ -55,27 +55,30 @@ class UrlRepository:
 
     def check_url_h1_title_description(self, url):
         seo = {}
-        response = requests.get(url)
-        html_content = response.text
-        soup = BeautifulSoup(html_content, 'html.parser')
-        h1 = soup.h1
-        if h1:
-            seo['h1'] = h1.text
-        else:
-            seo['h1'] = ""
-        title = soup.title
-        if title:
-            seo['title'] = title.text
-        else:
-            seo['title'] = ""
-        meta_description_tag = soup.find('meta', attrs={'name': 'description'})
-        if meta_description_tag:
-            description = meta_description_tag.get('content')
-        else:
-            description = ""
-        seo['description'] = description
-
-        return seo
+        try:
+            response = requests.get(url)
+            html_content = response.text
+            soup = BeautifulSoup(html_content, 'html.parser')
+            h1 = soup.h1
+            if h1:
+                seo['h1'] = h1.text
+            else:
+                seo['h1'] = ""
+            title = soup.title
+            if title:
+                seo['title'] = title.text
+            else:
+                seo['title'] = ""
+            meta_description_tag = soup.find('meta', attrs={'name': 'description'})
+            if meta_description_tag:
+                description = meta_description_tag.get('content')
+            else:
+                description = ""
+            seo['description'] = description
+            return seo
+        except requests.exceptions.RequestException as e:
+            print(f"Error occurred: {e}")
+            return None
 
     def get_checked(self, id):
         try:
