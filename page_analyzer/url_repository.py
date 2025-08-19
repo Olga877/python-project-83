@@ -1,5 +1,3 @@
-import requests
-from bs4 import BeautifulSoup
 from psycopg2.extras import RealDictCursor
 
 
@@ -44,96 +42,50 @@ class UrlRepository:
             except Exception:
                 return None
 
-    def check_url_status(self, url):
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            return response.status_code
-        except requests.exceptions.RequestException as e:
-            print(f"Error occurred: {e}")
-            return None
+    def get_checked(self, data, url_info):
+        query = """
+                    INSERT INTO url_checks 
+                    (url_id, status_code, h1, title, description)
+                    VALUES (%s, %s, %s, %s, %s) RETURNING id;
+                """
 
-    def check_url_h1_title_description(self, url):
-        seo = {}
-        try:
-            response = requests.get(url)
-            html_content = response.text
-            soup = BeautifulSoup(html_content, 'html.parser')
-            h1 = soup.h1.text if soup.h1 else None
-            title = soup.title.text if soup.title else None
-            meta_description_tag = soup.find('meta', attrs={'name': 'description'})
-            description = meta_description_tag.get('content') if meta_description_tag \
-                else None
-            seo['h1'] = h1
-            seo['title'] = title
-            seo['description'] = description
-            return seo
-        except requests.exceptions.RequestException as e:
-            print(f"Error occurred: {e}")
-            return None
-
-    def get_checked(self, id):
-        try:
-            url = self.find(id)['name']
-            seo = self.check_url_h1_title_description(url)
-            status = self.check_url_status(url)
-            if status:
-                with self.conn:
-                    with self.conn.cursor() as cur:
-                        cur.execute(
-                            """
-                                INSERT INTO url_checks 
-                                (url_id, status_code, h1, title, description)
-                                VALUES (%s, %s, %s, %s, %s) RETURNING id;""",
-                        (id, status, seo['h1'], seo['title'],
-                         seo['description'])
-                        )
-                        check_id = cur.fetchone()[0]
-                        self.conn.commit()
-                        return check_id
-            else:
-                return None
-        except Exception:
-            return None
+        with self.conn:
+            with self.conn.cursor() as cur:
+                cur.execute(query, (
+                    url_info.get('id'),
+                    data.get('status'),
+                    data.get('h1'),
+                    data.get('title'),
+                    data.get('description'),
+                ))
+                self.conn.commit()
 
     def find_checks(self, id):
+        query = "SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;"
         with self.conn:
             try:
                 with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-                    cur.execute("SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC;", (id,))
+                    cur.execute(query, (id,))
                     return cur.fetchall()
             except Exception:
                 return None
 
     def get_content(self):
+        query = """
+                    SELECT DISTINCT ON (urls.id) 
+                        urls.*,
+                        COALESCE(url_checks.created_at::TEXT, '') 
+                        AS check_date,
+                        COALESCE(url_checks.status_code::TEXT, '') 
+                        AS status
+                    FROM urls
+                    LEFT JOIN url_checks ON urls.id = url_checks.url_id
+                    ORDER BY urls.id DESC;
+                """
         with self.conn:
             try:
                 with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
-                    cur.execute("""
-                                SELECT DISTINCT ON (urls.id) 
-                                    urls.*,
-                                    COALESCE(url_checks.created_at::TEXT, '') 
-                                    AS check_date,
-                                    COALESCE(url_checks.status_code::TEXT, '') 
-                                    AS status
-                                FROM urls
-                                LEFT JOIN url_checks ON urls.id = url_checks.url_id
-                                ORDER BY urls.id DESC;
-                            """)
-
+                    cur.execute(query)
                     return cur.fetchall()
             except Exception:
                 return None
-
-    def is_unique(self, url):
-        with self.conn:
-            with self.conn.cursor() as cur:
-                cur.execute(
-                    "SELECT 1 FROM urls WHERE name = %s;",
-                    (url,)
-                )
-                name = cur.fetchone()
-
-                if not name:
-                    return True
-                return False

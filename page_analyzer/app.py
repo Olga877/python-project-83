@@ -1,8 +1,7 @@
 import os
-from urllib.parse import urlparse
 
 import psycopg2
-import validators
+import requests
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -14,7 +13,9 @@ from flask import (
     url_for,
 )
 
+from page_analyzer.parser import check_data
 from page_analyzer.url_repository import UrlRepository
+from page_analyzer.url_validator import normalize_url, validate_url
 
 load_dotenv()
 app = Flask(__name__)
@@ -53,43 +54,48 @@ def urls_get():
     )
 
 
-@app.post('/')
+@app.route('/urls', methods=['POST'])
 def url_post():
     conn = psycopg2.connect(DATABASE_URL)
     repo = UrlRepository(conn)
-    unparsed_url = request.form['url']
-    parsed_url = urlparse(request.form['url'])
-    url_data = f"{parsed_url.scheme}://{parsed_url.netloc}"
-    is_valid = validators.url(unparsed_url)
-    if not is_valid:
-        flash('Некорректный URL', 'error')
+    url = request.form.to_dict()
+    errors = validate_url(url['url'])
+
+    if errors:
+        flash('Некорректный URL', 'danger')
         return render_template(
             'index.html',
-            url_address=unparsed_url,
         ), 422
-    unique_url = repo.is_unique(url_data)
-    if unique_url:
-        url_id = repo.save(url_data)
-        flash('Страница успешно добавлена', 'success')
-        return redirect(url_for('url_show', id=url_id), code=302)
-    else:
-        url_id = repo.find_by_name(url_data)
+
+    normalized_url = normalize_url(url['url'])
+    url_info = repo.find_by_name(normalized_url)
+    if url_info is not None:
         flash('Страница уже существует', 'error')
-        return redirect(url_for('url_show', id=url_id), code=302)
+        return redirect(url_for('url_show', id=url_info), code=302)
+
+    url_id = repo.save(normalized_url)
+    flash('Страница успешно добавлена', 'success')
+    return redirect(url_for('url_show', id=url_id), code=302)
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def url_check(id):
     conn = psycopg2.connect(DATABASE_URL)
     repo = UrlRepository(conn)
-    url = repo.find(id)
-    result = repo.get_checked(id)
-    if result:
-        flash('Страница успешно проверена', 'success')
-        return redirect(url_for('url_show', id=url['id']), code=302)
-    else:
+    url_info = repo.find(id)
+    try:
+        response = requests.get(url_info.get('name'))
+        response.raise_for_status()
+    except requests.RequestException:
         flash('Произошла ошибка при проверке', 'error')
-        return redirect(url_for('url_show', id=url['id']), code=302)
+        return redirect(url_for('url_show', id=id), code=302)
+
+    status = response.status_code
+    data = check_data(response)
+    data['status'] = status
+    repo.get_checked(data, url_info)
+    flash('Страница успешно проверена', 'success')
+    return redirect(url_for('url_show', id=id), code=302)
 
 
 if __name__ == '__main__':
