@@ -62,7 +62,7 @@ def url_post():
     errors = validate_url(url['url'])
 
     if errors:
-        flash('Некорректный URL', 'danger')
+        flash('Некорректный URL', 'error')
         return render_template(
             'index.html',
         ), 422
