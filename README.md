@@ -11,6 +11,7 @@ Page Analyzer is a website that analyzes specified pages for SEO readiness, simi
 
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Olga877/python-project-83/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Olga877/python-project-83/actions)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Olga877_python-project-83&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Olga877_python-project-83)
 ****
 
 [//]: # ([Демонстрация проекта на render.com]&#40;https://python-project-83-83hv.onrender.comm&#41;)
