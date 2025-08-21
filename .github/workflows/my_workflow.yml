@@ -1,4 +1,4 @@
-name: my check
+name: my_check
 
 on:
   - push
