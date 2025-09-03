@@ -6,10 +6,6 @@
 Page Analyzer is a website that analyzes specified pages for SEO readiness, similar to PageSpeed Insights.
 ****
 
-### Page Analyzer render.com webservice:
-https://python-project-83-fy43.onrender.com/
-****
-
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Olga877/python-project-83/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Olga877/python-project-83/actions)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Olga877_python-project-83&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Olga877_python-project-83)
